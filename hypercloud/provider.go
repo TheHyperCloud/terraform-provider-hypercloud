@@ -29,7 +29,8 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			//"hypercloud_performance_tier" : dataSourceHypercloudPerformanceTier(),
+			//"hypercloud_disk_performance_tier" : dataSourceHypercloudDiskPerformanceTier(),
+            //"hypercloud_instance_performance_tier" : dataSourceHypercloudInstancePerformanceTier(),
 			"hypercloud_region": dataSourceHypercloudRegion(),
 			//"hypercloud_template" : datasourceHypercloudTemplate(),
 		},
