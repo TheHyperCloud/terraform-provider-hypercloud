@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	hypercloud "bitbucket.org/mistarhee/hypercloud"
+	hcc "bitbucket.org/mistarhee/hypercloud-go-client/hypercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -29,9 +29,9 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-		//"hypercloud_performance_tier" : dataSourceHypercloudPerformanceTier(),
-		//"hypercloud_region" : dataSourceHypercloudRegeion(),
-		//"hypercloud_console_session" : datasourceHypercloudConsoleSession(),
+			//"hypercloud_performance_tier" : dataSourceHypercloudPerformanceTier(),
+			"hypercloud_region": dataSourceHypercloudRegion(),
+			//"hypercloud_template" : datasourceHypercloudTemplate(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"hypercloud_instance": resourceHypercloudInstance(),
@@ -39,7 +39,6 @@ func Provider() terraform.ResourceProvider {
 			//"hypercloud_network" : resourceHypercloudNetwork(),
 			//"hypercloud_ip_address" : resourceHypercloudIPAddress(),
 			//"hypercloud_public_key" : resourceHypercloudPublicKey(),
-			//"hypercloud_template" : resourceHypercloudTemplate(),
 		},
 
 		ConfigureFunc: initHyperCloud,
@@ -49,7 +48,7 @@ func Provider() terraform.ResourceProvider {
 func initHyperCloud(d *schema.ResourceData) (hc interface{}, err error) {
 	auth := strings.Split(d.Get("credentials").(string), ":")
 	var mErr []error
-	hc, mErr = hypercloud.NewHypercloud(d.Get("base_url").(string), auth[0], auth[1])
+	hc, mErr = hcc.NewHypercloud(d.Get("base_url").(string), auth[0], auth[1])
 	if mErr != nil {
 		err = fmt.Errorf("%v", mErr)
 	} else {

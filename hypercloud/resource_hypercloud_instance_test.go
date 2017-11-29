@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	"bitbucket.org/mistarhee/hypercloud" //Replace with "official" repo
+	hcc "bitbucket.org/mistarhee/hypercloud-go-client/hypercloud" //Replace with "official" repo
 )
 
 //Can't really test anything apart from just creating a basic instance with some ram, a name and a specific region/performance tier
@@ -26,7 +26,7 @@ func TestResourceHypercloudInstance_basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccInstance_basic(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckInstanceExists("PotatoStomper", &instance),
+					testAccCheckInstanceExists("hypercloud_instance.PotatoStomper", &instance),
 					testAccCheckInstanceName(&instance, name),
 					testAccCheckInstanceRam(&instance, 4096),
 					testAccCheckInstancePerformanceTier(&instance, "55f841d6-7e19-4de9-be47-93f650ff9f9b"),
@@ -58,7 +58,7 @@ func testAccCheckInstanceExists(n string, instance *map[string]interface{}) reso
 			return fmt.Errorf("No ID is set")
 		}
 
-		hc := hypercloud.ToHypercloud(testAccProvider.Meta())
+		hc := hcc.ToHypercloud(testAccProvider.Meta())
 		instanceInfo, err := hc.InstanceInfo(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Failed to get instance info: \n%v", err)
@@ -84,8 +84,8 @@ func testAccCheckInstanceName(instance *map[string]interface{}, name string) res
 
 func testAccCheckInstanceRam(instance *map[string]interface{}, ram int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if (*instance)["memory"].(int) != ram {
-			return fmt.Errorf("Instance memory %d doesn't match provided memory %d", (*instance)["memory"].(int), ram)
+		if int((*instance)["memory"].(float64)) != ram {
+			return fmt.Errorf("Instance memory %d doesn't match provided memory %d", int((*instance)["memory"].(float64)), ram)
 		}
 		return nil
 	}
@@ -93,7 +93,7 @@ func testAccCheckInstanceRam(instance *map[string]interface{}, ram int) resource
 
 func testAccCheckInstancePerformanceTier(instance *map[string]interface{}, performance_tier string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if (*instance)["performance_tier"].(string) != performance_tier {
+		if (*instance)["performance_tier"].(map[string]interface{})["id"].(string) != performance_tier {
 			return fmt.Errorf("Instance performance_tier %s doesn't match generated performance_tier %s", (*instance)["performance_tier"].(string), performance_tier)
 		}
 		return nil
@@ -102,7 +102,7 @@ func testAccCheckInstancePerformanceTier(instance *map[string]interface{}, perfo
 
 func testAccCheckInstanceRegion(instance *map[string]interface{}, region string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if (*instance)["region"].(string) != region {
+		if (*instance)["region"].(map[string]interface{})["id"].(string) != region {
 			return fmt.Errorf("Instance region %s doesn't match generated region %s", (*instance)["region"].(string), region)
 		}
 		return nil
@@ -110,7 +110,7 @@ func testAccCheckInstanceRegion(instance *map[string]interface{}, region string)
 }
 
 func testAccCheckInstanceDestroy(s *terraform.State) error {
-	hc := hypercloud.ToHypercloud(testAccProvider.Meta())
+	hc := hcc.ToHypercloud(testAccProvider.Meta())
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "hypercloud_instance" {

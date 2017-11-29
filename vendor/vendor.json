@@ -3,8 +3,8 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "2u+nQzgh+SOTQEUrEZzem5CFhm4=",
-			"path": "bitbucket.org/mistarhee/hypercloud",
+			"checksumSHA1": "SicGPBlLZOmdprq1HMBYx20Z4po=",
+			"path": "bitbucket.org/mistarhee/hypercloud-go-client/hypercloud",
 			"revision": "e5a61717cef7bf95922da02bfa755e0e7e09c128",
 			"revisionTime": "2017-11-27T01:42:28Z"
 		},

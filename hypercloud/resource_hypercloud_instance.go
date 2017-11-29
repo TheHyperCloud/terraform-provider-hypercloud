@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	ovmhc "bitbucket.org/mistarhee/hypercloud"
+	hcc "bitbucket.org/mistarhee/hypercloud-go-client/hypercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 )
@@ -24,30 +24,30 @@ func resourceHypercloudInstance() *schema.Resource {
 		SchemaVersion: 1, //For API v1
 
 		Schema: map[string]*schema.Schema{
-			"memory": {
-				Type:         schema.TypeInt,
+			"memory": &schema.Schema{
+				Type:         schema.TypeInt, //Is float from json, but memory is gonna be of int anyway
 				Required:     true,
 				ValidateFunc: memoryValidation,
 				Description:  "Instance RAM in megabytes. Must be a power of 2",
 			},
-			"name": {
+			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Name of the instance",
 			},
-			"performance_tier": {
+			"performance_tier": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 				Description: "ID of the performance tier to assign to the instance",
 			},
-			"region": {
+			"region": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 				Description: "ID of the region in which to create the instance",
 			},
-			"availability_group": {
+			"availability_group": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 2, //3 max in availiability group
@@ -56,14 +56,14 @@ func resourceHypercloudInstance() *schema.Resource {
 				},
 				Description: "IDs of the instances that should be grouped together with the instance for high availability",
 			},
-			"boot_device": {
+			"boot_device": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "disk",
 				ValidateFunc: validation.StringInSlice([]string{"disk", "cdrom", "network"}, false),
 				Description:  "Device from which the instance should boot. One of `disk`, `cdrom`, `network`",
 			},
-			"disks": {
+			"disks": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -71,7 +71,7 @@ func resourceHypercloudInstance() *schema.Resource {
 				},
 				Description: "IDs of disks to be attached to the instance, in device order",
 			},
-			"ip_addresses": {
+			"ip_addresses": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -79,7 +79,7 @@ func resourceHypercloudInstance() *schema.Resource {
 				},
 				Description: "IDs of IP addresses to be assigned to the instance",
 			},
-			"public_keys": {
+			"public_keys": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -87,40 +87,40 @@ func resourceHypercloudInstance() *schema.Resource {
 				},
 				Description: "IDs of public keys that can be used to access the instance",
 			},
-			"start_on_crash": {
+			"start_on_crash": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
 				Description: "Whether to restart the instance after a crash event",
 			},
-			"start_on_reboot": {
+			"start_on_reboot": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
 				Description: "Whether to restart the instance after a reboot event",
 			},
-			"start_on_shutdown": {
+			"start_on_shutdown": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
 				Description: "Whether to restart the instance after a shutdown event",
 			},
-			"virtualization": {
+			"virtualization": &schema.Schema{
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "hvm",
 				ValidateFunc: validation.StringInSlice([]string{"disk", "cdrom", "network"}, false),
 				Description:  "Virtualization mode. One of `hvm`, `pv`",
 			},
-			"created_at": {
+			"created_at": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"updated_at": {
+			"updated_at": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"instance_id": {
+			"instance_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -151,7 +151,7 @@ func memoryValidation(i interface{}, k string) (s []string, es []error) {
 }
 
 func resourceHypercloudInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	hc := ovmhc.ToHypercloud(meta)
+	hc := hcc.ToHypercloud(meta)
 	requestData := make(map[string]interface{})
 
 	/* Get the essentials (memory/name/performancetier/region) */
@@ -225,7 +225,7 @@ func resourceHypercloudInstanceCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceHypercloudInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	hc := ovmhc.ToHypercloud(meta)
+	hc := hcc.ToHypercloud(meta)
 	ret, err := hc.InstanceInfo(d.Id())
 	if err != nil {
 		return fmt.Errorf("%v", err)
@@ -234,7 +234,7 @@ func resourceHypercloudInstanceRead(d *schema.ResourceData, meta interface{}) er
 	instance := ret.(map[string]interface{})
 
 	/* Lets fill out the form shall we? */
-	d.Set("memory", instance["memory"].(float64))
+	d.Set("memory", int(instance["memory"].(float64)))
 	d.Set("name", instance["name"].(string))
 	d.Set("performance_tier", instance["performance_tier"].(map[string]interface{})["id"].(string))
 	d.Set("region", instance["region"].(map[string]interface{})["id"].(string))
@@ -298,7 +298,7 @@ func resourceHypercloudInstanceRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceHypercloudInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	hc := ovmhc.ToHypercloud(meta)
+	hc := hcc.ToHypercloud(meta)
 
 	d.Partial(true)
 	//Lets start from the top of the round.
@@ -510,7 +510,7 @@ func resourceHypercloudInstanceUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceHypercloudInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	hc := ovmhc.ToHypercloud(meta)
+	hc := hcc.ToHypercloud(meta)
 	_, err := hc.InstanceDelete(d.Id())
 	if err != nil {
 		fmt.Errorf("%v", err)
@@ -521,7 +521,7 @@ func resourceHypercloudInstanceDelete(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceHypercloudInstanceExists(d *schema.ResourceData, meta interface{}) (exists bool, err error) {
-	hc := ovmhc.ToHypercloud(meta)
+	hc := hcc.ToHypercloud(meta)
 	_, infErr := hc.InstanceInfo(d.Id())
 	if infErr == nil {
 		exists = true
@@ -532,7 +532,7 @@ func resourceHypercloudInstanceExists(d *schema.ResourceData, meta interface{}) 
 }
 
 func waitInstanceUp(meta interface{}, id string, timeoutS int) error {
-	hc := ovmhc.ToHypercloud(meta)
+	hc := hcc.ToHypercloud(meta)
 	start := time.Now() //Possibly need for logging
 	end := start.Add(time.Duration(timeoutS) * time.Second)
 	for end.After(time.Now()) {
@@ -551,7 +551,7 @@ func waitInstanceUp(meta interface{}, id string, timeoutS int) error {
 }
 
 func waitInstanceUpdate(meta interface{}, id string, timeoutS int) error {
-	hc := ovmhc.ToHypercloud(meta)
+	hc := hcc.ToHypercloud(meta)
 	start := time.Now()
 	end := start.Add(time.Duration(timeoutS) * time.Second)
 	for end.After(time.Now()) {
@@ -568,7 +568,7 @@ func waitInstanceUpdate(meta interface{}, id string, timeoutS int) error {
 }
 
 func waitInstanceTerminate(meta interface{}, id string, timeoutS int) error {
-	hc := ovmhc.ToHypercloud(meta)
+	hc := hcc.ToHypercloud(meta)
 	start := time.Now()
 	end := start.Add(time.Duration(timeoutS) * time.Second)
 	for end.After(time.Now()) {
