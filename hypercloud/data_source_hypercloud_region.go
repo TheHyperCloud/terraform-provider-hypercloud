@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	//Hypercloud-client. Replace with actual repo on git
-	hcc "bitbucket.org/mistarhee/hypercloud-go-client/hypercloud"
+	hcc "github.com/TheHyperCloud/hypercloud-go-client/hypercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 

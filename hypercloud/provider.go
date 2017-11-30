@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	hcc "bitbucket.org/mistarhee/hypercloud-go-client/hypercloud"
+	hcc "github.com/TheHyperCloud/hypercloud-go-client/hypercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -30,7 +30,7 @@ func Provider() terraform.ResourceProvider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			//"hypercloud_disk_performance_tier" : dataSourceHypercloudDiskPerformanceTier(),
-            //"hypercloud_instance_performance_tier" : dataSourceHypercloudInstancePerformanceTier(),
+			//"hypercloud_instance_performance_tier" : dataSourceHypercloudInstancePerformanceTier(),
 			"hypercloud_region": dataSourceHypercloudRegion(),
 			//"hypercloud_template" : datasourceHypercloudTemplate(),
 		},

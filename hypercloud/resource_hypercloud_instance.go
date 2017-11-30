@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	hcc "bitbucket.org/mistarhee/hypercloud-go-client/hypercloud"
+	hcc "github.com/TheHyperCloud/hypercloud-go-client/hypercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 )

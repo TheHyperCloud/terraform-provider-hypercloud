@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	hcc "bitbucket.org/mistarhee/hypercloud-go-client/hypercloud" //Replace with "official" repo
+	hcc "github.com/TheHyperCloud/hypercloud-go-client/hypercloud"
 )
 
 //Can't really test anything apart from just creating a basic instance with some ram, a name and a specific region/performance tier
