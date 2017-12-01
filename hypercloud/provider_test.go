@@ -29,11 +29,6 @@ func testAccPreCheck(t *testing.T) {
 	u := os.Getenv("HC_BASE_URL")
 	c := os.Getenv("HC_CREDENTIALS")
 	if u != "" && c != "" {
-		var credentials = strings.Split(c, ":")
-
-		if len(credentials) != 2 {
-			t.Fatalf("Credentials (%s) in invalid format. Credentials must be of format <ACCESS>:<SECRET>", c)
-		}
 		if !strings.HasPrefix(u, "https") {
 			t.Fatalf("Base url %s is not https", u)
 		}

@@ -120,10 +120,6 @@ func resourceHypercloudInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"instance_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -290,7 +286,6 @@ func resourceHypercloudInstanceRead(d *schema.ResourceData, meta interface{}) er
 	//Created At
 	d.Set("created_at", instance["created_at"].(string))
 	d.Set("updated_at", instance["updated_at"].(string))
-	d.Set("instance_id", instance["id"].(string))
 
 	d.SetId(instance["id"].(string))
 	//We donezo 8^)

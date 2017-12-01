@@ -14,11 +14,10 @@ func Provider() terraform.ResourceProvider {
 		//Credentials in format <access_key>:<secret_key> or just <access_token>
 		Schema: map[string]*schema.Schema{
 			"credentials": &schema.Schema{
-				Type:         schema.TypeString,
-				Required:     true,
-				DefaultFunc:  schema.MultiEnvDefaultFunc([]string{"HC_CREDENTIALS"}, nil),
-				Description:  "Credentials in `<application_id>:<secret>` format",
-				ValidateFunc: validateCredentials,
+				Type:        schema.TypeString,
+				Required:    true,
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{"HC_CREDENTIALS"}, nil),
+				Description: "The access token for the specified hypercloud account",
 			},
 			"base_url": &schema.Schema{
 				Type:         schema.TypeString,
@@ -47,24 +46,14 @@ func Provider() terraform.ResourceProvider {
 }
 
 func initHyperCloud(d *schema.ResourceData) (hc interface{}, err error) {
-	auth := strings.Split(d.Get("credentials").(string), ":")
+	auth := d.Get("credentials").(string)
 	var mErr []error
-	hc, mErr = hcc.NewHypercloud(d.Get("base_url").(string), auth[0], auth[1])
+	hc, mErr = hcc.NewHypercloud(d.Get("base_url").(string), auth)
 	if mErr != nil {
 		err = fmt.Errorf("%v", mErr)
 	} else {
 		err = nil
 	}
-	return
-}
-
-func validateCredentials(v interface{}, k string) (warnings []string, errors []error) {
-	creds := strings.Split(v.(string), ":")
-	if len(creds) != 2 {
-		errors = append(errors, fmt.Errorf("Fatal: Supplied credentials (%s) are invalid. Please input the credentials in format <access_id>:<secret_id>, %d", v.(string), len(creds)))
-		return
-	}
-	/* Try with these credentials I guess */
 	return
 }
 
